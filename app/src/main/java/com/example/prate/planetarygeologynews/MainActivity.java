@@ -1,27 +1,31 @@
 package com.example.prate.planetarygeologynews;
 
+import android.app.LoaderManager;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.os.AsyncTask;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Loader;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LoaderCallbacks<List<Article>>  {
 
     private static final String LOG_TAG = MainActivity.class.getName();
+    private static final int ARTICLE_LOADER_ID = 1;
 
     /**
      * URL to fetch data about planetary geology news articles from the Guardian
      */
 
     private static final String GUARDIAN_URL =
-            "https://content.guardianapis.com/search?show-tags=contributor&section=science&page-size=15&q=Planetary%20Geology%20&api-key=9c7bd5cd-f13d-4e2d-b684-153f6f57fa01";
+            "https://content.guardianapis.com/search?show-tags=contributor&section=science&page-size=15&q=NASA&api-key=9c7bd5cd-f13d-4e2d-b684-153f6f57fa01";
 
     private  ArticleAdapter mAdapter;
 
@@ -30,18 +34,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Start AsyncTask to fetch the news articles data
-        //ArticleAsyncTask
-        ArticleAsyncTask task = new ArticleAsyncTask();
-        task.execute(GUARDIAN_URL);
 
         // Create a list of words
-        ArrayList<Article> articles = new ArrayList<Article>();
+        ArrayList<Article> articles = new ArrayList<>();
 
         // Find the {@link ListView} object in the view hierarchy of the {@link Activity}.
         // There should be a {@link ListView} with the view ID called list, which is declared in the
         // word_list.xml layout file.
-        ListView listView = (ListView) findViewById(R.id.list);
+        ListView listView = findViewById(R.id.list);
 
         // Create an {@link WordAdapter}, whose data source is a list of {@link Word}s. The
         // adapter knows how to create list items for each item in the list.
@@ -70,35 +70,48 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        // Get a reference to the LoaderManager, in order to interact with loaders.
+        LoaderManager loaderManager = getLoaderManager();
+
+        // Initialize the loader. Pass in the int ID constant defined above and pass in null for
+        // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
+        // because this activity implements the LoaderCallbacks interface).
+        loaderManager.initLoader(ARTICLE_LOADER_ID, null, this);
+        Log.i("initLoader", "Initialize Loader");
+
     }
 
 
-    private class ArticleAsyncTask extends AsyncTask<String, Void, List<Article>> {
 
-        @Override
-        protected List<Article> doInBackground(String... urls) {
-            // Don't perform the request if there are no URLs, or the first URL is null.
-            if (urls.length < 1 || urls[0] == null) {
-                return null;
-            }
+    @Override
+    public Loader<List<Article>> onCreateLoader(int i, Bundle bundle){
+        // Create a new loader for the given URL
 
-            List<Article> result = QueryUtils.fetchArticleData(urls[0]);
-            return result;
+        Log.i("OnCreatLoader", GUARDIAN_URL);
+        return new ArticleLoader(this, GUARDIAN_URL);
+
+    }
+
+
+    @Override
+    public void onLoadFinished(Loader<List<Article>> loader, List<Article> articles) {
+        // Clear the adapter of previous earthquake data
+        mAdapter.clear();
+
+        // If there is a valid list of {@link Earthquake}s, then add them to the adapter's
+        // data set. This will trigger the ListView to update.
+        if (articles != null && !articles.isEmpty()) {
+            mAdapter.addAll(articles);
         }
 
-        @Override
-        protected void onPostExecute(List<Article> data) {
-            // Clear the adapter of previous earthquake data
-            mAdapter.clear();
+        Log.i("onLoadFinished", "LoadFinished");
+    }
 
-            // If there is a valid list of Articles, then add them to the adapter's
-            // data set. This will trigger the ListView to update.
-            if (data != null && !data.isEmpty()) {
-                mAdapter.addAll(data);
-            }
-
-        }
-
-
+    @Override
+    public void onLoaderReset(Loader<List<Article>> loader) {
+        // Loader reset, so we can clear out our existing data.
+        mAdapter.clear();
+        Log.i("onLoaderReset", "OnLoaderReset");
     }
 }

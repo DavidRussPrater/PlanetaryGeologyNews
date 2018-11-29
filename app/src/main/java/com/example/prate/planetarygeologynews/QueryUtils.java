@@ -43,11 +43,9 @@ public class QueryUtils {
             Log.e(LOG_TAG, "Problem making the HTTP request.", e);
         }
 
-        // Extract relevant fields from the JSON response and create a list of NewsStories
-        List<Article> articles = extractFeatureFromJson(jsonResponse);
+        // Extract relevant fields from the JSON response and return a list of NewsStories
+        return extractFeatureFromJson(jsonResponse);
 
-        // Return the list of NewsStories
-        return articles;
     }
 
 
@@ -165,7 +163,6 @@ public class QueryUtils {
 
                 // Extract the value for the key called "webTitle"
                 String articleTitle = currentArticle.getString("webTitle");
-                Log.i("Article title: ", articleTitle);
 
                 //Extract the JSONArray with the key "tag"
                 JSONArray tagsArray = currentArticle.getJSONArray("tags");
@@ -179,21 +176,18 @@ public class QueryUtils {
                     if (author.isEmpty()){
                         author = "No Author";
                     }
-                    Log.i("Author", author);
+
                 }
 
                 // Extract the value for the key called "webPublicationDate"
                 String unformattedDate = currentArticle.getString("webPublicationDate");
                 String date = unformattedDate.substring(0, 10);
-                Log.i("Date: ", date);
 
                 // Extract the value for the key called "sectionName"
                 String section = currentArticle.getString("sectionName");
-                Log.i("Section: ", section);
 
                 // Extract the value for the key called "url"
                 String url = currentArticle.getString("webUrl");
-                Log.i("Url log", url);
 
                 // Create a new Article object with the title, section name, date,
                 // and url from the JSON response.
