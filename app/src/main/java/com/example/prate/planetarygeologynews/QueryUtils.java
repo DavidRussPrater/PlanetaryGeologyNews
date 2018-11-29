@@ -203,7 +203,7 @@ public class QueryUtils {
             Log.e("QueryUtils", "Problem parsing the article JSON results", e);
         }
 
-        // Return the list of earthquakes
+        // Return the list of articles
         return articles;
     }
 
