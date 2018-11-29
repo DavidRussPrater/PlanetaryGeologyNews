@@ -18,21 +18,16 @@ public class ArticleLoader extends AsyncTaskLoader<List<Article>> {
     @Override
     protected void onStartLoading() {
         forceLoad();
-        Log.i("startLoading", "forceLoad");
     }
 
     @Override
     public List<Article> loadInBackground() {
-        Log.i("loadInBackground", "loadInBackground");
         if (mUrl == null) {
             return null;
         }
 
-        List<Article> articles = QueryUtils.fetchArticleData(mUrl);
-
-        Log.i("QueryUtils", "fetchArticleData");
-
-        return articles;
+        return QueryUtils.fetchArticleData(mUrl);
+        
 
     }
 }

@@ -1,7 +1,10 @@
 package com.example.prate.planetarygeologynews;
 
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,12 +16,17 @@ import java.util.ArrayList;
 import java.util.List;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Loader;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 
 public class MainActivity extends AppCompatActivity implements LoaderCallbacks<List<Article>>  {
 
     private static final String LOG_TAG = MainActivity.class.getName();
     private static final int ARTICLE_LOADER_ID = 1;
+
+    private TextView mEmptyStateTextView;
+
 
     /**
      * URL to fetch data about planetary geology news articles from the Guardian
@@ -34,7 +42,6 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         // Create a list of words
         ArrayList<Article> articles = new ArrayList<>();
 
@@ -42,6 +49,9 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
         // There should be a {@link ListView} with the view ID called list, which is declared in the
         // word_list.xml layout file.
         ListView listView = findViewById(R.id.list);
+
+        mEmptyStateTextView = findViewById(R.id.empty_view);
+        listView.setEmptyView(mEmptyStateTextView);
 
         // Create an {@link WordAdapter}, whose data source is a list of {@link Word}s. The
         // adapter knows how to create list items for each item in the list.
@@ -71,24 +81,37 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
         });
 
 
-        // Get a reference to the LoaderManager, in order to interact with loaders.
-        LoaderManager loaderManager = getLoaderManager();
 
-        // Initialize the loader. Pass in the int ID constant defined above and pass in null for
-        // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
-        // because this activity implements the LoaderCallbacks interface).
-        loaderManager.initLoader(ARTICLE_LOADER_ID, null, this);
-        Log.i("initLoader", "Initialize Loader");
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        if (networkInfo != null && networkInfo.isConnected()) {
+
+            // Get a reference to the LoaderManager, in order to interact with loaders.
+            LoaderManager loaderManager = getLoaderManager();
+
+            // Initialize the loader. Pass in the int ID constant defined above and pass in null for
+            // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
+            // because this activity implements the LoaderCallbacks interface).
+            loaderManager.initLoader(ARTICLE_LOADER_ID, null, this);
+
+        } else {
+            // Display error that there is no network connectivity and hide the progress bar
+            View loadingIndicator = findViewById(R.id.loading_indicator);
+            loadingIndicator.setVisibility(View.GONE);
+
+            // Update empty state with no connection error message
+            mEmptyStateTextView.setText(R.string.no_internet_connection);
+        }
 
     }
-
 
 
     @Override
     public Loader<List<Article>> onCreateLoader(int i, Bundle bundle){
         // Create a new loader for the given URL
-
-        Log.i("OnCreatLoader", GUARDIAN_URL);
         return new ArticleLoader(this, GUARDIAN_URL);
 
     }
@@ -96,6 +119,13 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
 
     @Override
     public void onLoadFinished(Loader<List<Article>> loader, List<Article> articles) {
+        // Hide loading indicator because data has been loaded
+        View loadingIndicator = findViewById(R.id.loading_indicator);
+        loadingIndicator.setVisibility(View.GONE);
+
+        // Set empty state to display ""No articles found"
+        mEmptyStateTextView.setText(R.string.no_articles);
+
         // Clear the adapter of previous earthquake data
         mAdapter.clear();
 
@@ -105,13 +135,12 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
             mAdapter.addAll(articles);
         }
 
-        Log.i("onLoadFinished", "LoadFinished");
+
     }
 
     @Override
     public void onLoaderReset(Loader<List<Article>> loader) {
         // Loader reset, so we can clear out our existing data.
         mAdapter.clear();
-        Log.i("onLoaderReset", "OnLoaderReset");
     }
 }
