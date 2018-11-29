@@ -29,23 +29,24 @@ public class ArticleAdapter extends ArrayAdapter<Article> {
         // Get the {@link Tour} oject located at this position in the list
         Article currentArticle = getItem(position);
 
-        // TITLE
+        // Set the title of the articles text to the articleTextView
         TextView articleTitleTextView = listItemView.findViewById(R.id.article_title_text_view);
         articleTitleTextView.setText(currentArticle.getArticleTitle());
         articleTitleTextView.setSelected(true);
 
-        //AUTHOR
+        //Set the author of the article to the authorTextView
         TextView authorTextView = listItemView.findViewById(R.id.author_text_view);
         authorTextView.setText(currentArticle.getAuthor());
+        // If the authorTextView is empty set it to "No Author Referenced"
         if (authorTextView.getText().toString().matches("")) {
             authorTextView.setText(R.string.no_author);
         }
 
-        // DATE
+        // Set the date of publication to the dateTextView
         TextView dateTextView = listItemView.findViewById(R.id.date_text_view);
         dateTextView.setText(currentArticle.getDate());
 
-        // SECTION
+        // Set the articles section to the sectionTextView
         TextView sectionTextView = listItemView.findViewById(R.id.section_text_view);
         sectionTextView.setText(currentArticle.getSection());
 

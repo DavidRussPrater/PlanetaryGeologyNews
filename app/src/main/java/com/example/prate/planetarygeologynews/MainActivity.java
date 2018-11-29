@@ -6,36 +6,39 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Loader;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 
-public class MainActivity extends AppCompatActivity implements LoaderCallbacks<List<Article>>  {
+public class MainActivity extends AppCompatActivity implements LoaderCallbacks<List<Article>> {
 
     private static final String LOG_TAG = MainActivity.class.getName();
+
     private static final int ARTICLE_LOADER_ID = 1;
-
-    private TextView mEmptyStateTextView;
-
-
     /**
      * URL to fetch data about planetary geology news articles from the Guardian
      */
 
     private static final String GUARDIAN_URL =
             "https://content.guardianapis.com/search?show-tags=contributor&section=science&page-size=15&q=NASA&api-key=9c7bd5cd-f13d-4e2d-b684-153f6f57fa01";
+    SwipeRefreshLayout mSwipeRefreshLayout;
 
-    private  ArticleAdapter mAdapter;
+    // Initialize and empty TextView for when there is no network connection
+    private TextView mEmptyStateTextView;
+
+    // Initialize an ArticleAdapter
+    private ArticleAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +46,14 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
         setContentView(R.layout.activity_main);
 
         // Create a list of words
-        ArrayList<Article> articles = new ArrayList<>();
+        final ArrayList<Article> articles = new ArrayList<>();
 
         // Find the {@link ListView} object in the view hierarchy of the {@link Activity}.
         // There should be a {@link ListView} with the view ID called list, which is declared in the
         // word_list.xml layout file.
         ListView listView = findViewById(R.id.list);
 
+        // Link mEmptyStateTextView to the corresponding xml text view
         mEmptyStateTextView = findViewById(R.id.empty_view);
         listView.setEmptyView(mEmptyStateTextView);
 
@@ -62,31 +66,32 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
         // {@link ListView} will display list items for each {@link Word} in the list.
         listView.setAdapter(mAdapter);
 
-        /* Set a click listener on the ListView */
+        // Set aa on click listener on the ListView to handle website intent
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                /* Find the current article that was clicked on */
+                // Find the current article that was clicked on
                 Article currentArticle = mAdapter.getItem(position);
 
-                /* Convert String URL into a URI object*/
+                // Convert the String URL into a URI object
                 Uri articleUri = Uri.parse(currentArticle.getUrl());
 
-                /* Create a new intent to view the article URI */
+                // Create a new intent to view the article URI
                 Intent websiteIntent = new Intent(Intent.ACTION_VIEW, articleUri);
 
-                /* Send the intent to launch a new activity */
+                // Send the intent to launch a new activity (The articles corresponding website)
                 startActivity(websiteIntent);
             }
         });
 
-
-
+        // Check the state of the devices network connectivity
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
+        // Get details on the currently active default data network
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
+        // If there is a network connection, fetch data
         if (networkInfo != null && networkInfo.isConnected()) {
 
             // Get a reference to the LoaderManager, in order to interact with loaders.
@@ -110,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
 
 
     @Override
-    public Loader<List<Article>> onCreateLoader(int i, Bundle bundle){
+    public Loader<List<Article>> onCreateLoader(int i, Bundle bundle) {
         // Create a new loader for the given URL
         return new ArticleLoader(this, GUARDIAN_URL);
 
@@ -143,4 +148,5 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
         // Loader reset, so we can clear out our existing data.
         mAdapter.clear();
     }
+
 }

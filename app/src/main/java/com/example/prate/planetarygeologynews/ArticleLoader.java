@@ -2,14 +2,16 @@ package com.example.prate.planetarygeologynews;
 
 import android.content.Context;
 import android.content.AsyncTaskLoader;
-import android.util.Log;
+
 
 import java.util.List;
 
 public class ArticleLoader extends AsyncTaskLoader<List<Article>> {
 
+    // Query URL
     private String mUrl;
 
+    // Construct a new{@link ArticleLoader}
     public ArticleLoader(Context context, String url) {
         super(context);
         mUrl = url;
@@ -20,6 +22,7 @@ public class ArticleLoader extends AsyncTaskLoader<List<Article>> {
         forceLoad();
     }
 
+    //This is performed on a background thread
     @Override
     public List<Article> loadInBackground() {
         if (mUrl == null) {
@@ -27,7 +30,7 @@ public class ArticleLoader extends AsyncTaskLoader<List<Article>> {
         }
 
         return QueryUtils.fetchArticleData(mUrl);
-        
+
 
     }
 }

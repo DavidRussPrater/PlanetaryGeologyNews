@@ -1,6 +1,5 @@
 package com.example.prate.planetarygeologynews;
 
-import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -32,11 +31,6 @@ public class QueryUtils {
      */
     public static List<Article> fetchArticleData(String requestUrl) {
 
-        /*try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }*/
 
         // Create URL object
         URL url = createUrl(requestUrl);
@@ -176,12 +170,11 @@ public class QueryUtils {
                 //Declare String variable to hold author name
                 String author = null;
 
+                // Extract the JSONArray associated with the key called "tags",
+                // and set the name of the author to "webTitle"
                 if (tagsArray.length() > 0) {
                     JSONObject contributorTag = (JSONObject) tagsArray.get(0);
                     author = contributorTag.getString("webTitle");
-                    if (author.isEmpty()){
-                        author = "No Author";
-                    }
 
                 }
 
