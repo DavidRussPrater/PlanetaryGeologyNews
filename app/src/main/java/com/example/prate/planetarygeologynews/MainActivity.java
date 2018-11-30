@@ -1,14 +1,26 @@
 package com.example.prate.planetarygeologynews;
 
+import android.app.ActionBar;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
+import android.preference.PreferenceManager;
+import android.support.annotation.RequiresApi;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -19,6 +31,7 @@ import java.util.List;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Loader;
 import android.widget.TextView;
+import android.widget.Toolbar;
 
 
 public class MainActivity extends AppCompatActivity implements LoaderCallbacks<List<Article>> {
@@ -31,7 +44,10 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
      */
 
     private static final String GUARDIAN_URL =
-            "https://content.guardianapis.com/search?show-tags=contributor&section=science&page-size=15&q=NASA&api-key=9c7bd5cd-f13d-4e2d-b684-153f6f57fa01";
+            "https://content.guardianapis.com/search?";
+
+                //"https://content.guardianapis.com/search?show-tags=contributor&section=science&page-size=15&q=NASA&api-key=9c7bd5cd-f13d-4e2d-b684-153f6f57fa01";
+
     SwipeRefreshLayout mSwipeRefreshLayout;
 
     // Initialize and empty TextView for when there is no network connection
@@ -40,13 +56,12 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
     // Initialize an ArticleAdapter
     private ArticleAdapter mAdapter;
 
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // Create a list of words
-        final ArrayList<Article> articles = new ArrayList<>();
 
         // Find the {@link ListView} object in the view hierarchy of the {@link Activity}.
         // There should be a {@link ListView} with the view ID called list, which is declared in the
@@ -114,10 +129,48 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
     }
 
 
+    //"https://content.guardianapis.com/search?show-tags=contributor&section=science&page-size=15&q=NASA&api-key=9c7bd5cd-f13d-4e2d-b684-153f6f57fa01";
+
     @Override
     public Loader<List<Article>> onCreateLoader(int i, Bundle bundle) {
+
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        String orderBy = sharedPrefs.getString(getString(R.string.settings_order_by_key), getString(R.string.settings_order_by_default));
+
+        String subject = sharedPrefs.getString(getString(R.string.settings_subject_key), getString(R.string.settings_subject_default));
+        Log.i("Article Subject", subject);
+
+        String section = sharedPrefs.getString(getString(R.string.settings_section_key), getString(R.string.settings_section_default));
+        Log.i("Article Section", section);
+
+        // parse breaks apart the URI string that's passed into its parameter
+        Uri baseUri = Uri.parse(GUARDIAN_URL);
+
+        // buildUpon prepares the baseUri that we just parsed so we can add query parameters to it
+        Uri.Builder uriBuilder = baseUri.buildUpon();
+
+
+        if (!subject.isEmpty()) {
+            uriBuilder.appendQueryParameter("q", subject);
+        }
+
+        if (!section.isEmpty()){
+            uriBuilder.appendQueryParameter("section", section);
+        }
+
+        uriBuilder.appendQueryParameter("show-tags", "contributor");
+        uriBuilder.appendQueryParameter("page-size", "15");
+        uriBuilder.appendQueryParameter("order-by", orderBy);
+        uriBuilder.appendQueryParameter("api-key", "9c7bd5cd-f13d-4e2d-b684-153f6f57fa01");
+
+
+        String URIcheck = uriBuilder.toString();
+        Log.i("URI String", URIcheck);
+
+
         // Create a new loader for the given URL
-        return new ArticleLoader(this, GUARDIAN_URL);
+        return new ArticleLoader(this, uriBuilder.toString());
 
     }
 
@@ -147,6 +200,25 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<L
     public void onLoaderReset(Loader<List<Article>> loader) {
         // Loader reset, so we can clear out our existing data.
         mAdapter.clear();
+    }
+
+    @Override
+    // This method initialize the contents of the Activity's options menu.
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the Options Menu we specified in XML
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }

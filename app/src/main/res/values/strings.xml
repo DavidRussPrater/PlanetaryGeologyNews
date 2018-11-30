@@ -1,6 +1,35 @@
 <resources>
-    <string name="app_name">PlanetaryGeologyNews</string>
+    <string name="app_name">Planetary Geology News</string>
     <string name="no_author">No Author Referenced</string>
     <string name="no_articles">No News Articles Found</string>
     <string name="no_internet_connection">No Internet Connection</string>
+    <string name="settings_menu_item">Settings</string>
+    <string name="settings_title">Article Settings</string>
+
+    <!-- Strings for the order by -->
+
+    <string name="settings_order_by_label">Sort by</string>
+    <string name="settings_order_by_key" translatable="false">orderBy</string>
+    <string name="settings_order_by_default" translatable="false">relevance</string>
+
+    <string name="settings_order_by_newest_label">Newest</string>
+    <string name="settings_order_by_newest_value">newest</string>
+
+    <string name="settings_order_by_oldest_label">Oldest</string>
+    <string name="settings_order_by_oldest_value">oldest</string>
+
+    <string name="settings_order_by_relevance_label">Relevance</string>
+    <string name="settings_order_by_relevance_value">relevance</string>
+
+    <!-- Strings for the "Section" preferences-->
+    
+    <string name="settings_subject_label">Subject</string>
+    <string name="settings_subject_key" translatable="false">topic</string>
+    <string name="settings_subject_default" translatable="false">NASA</string>
+
+    <string name="settings_section_label">Section</string>
+    <string name="settings_section_key">sections</string>
+    <string name="settings_section_default">science</string>
+
+
 </resources>
